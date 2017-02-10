@@ -15,7 +15,7 @@ def index(request):
 
     # Obtain our Response object early so we can add cookie information.
 
-
+    # Something Something
     # Call function to handle the cookies
     visitor_cookie_handler(request)
     context_dict['visits'] = request.session['visits']
@@ -30,9 +30,8 @@ def index(request):
 
 
 def about(request):
-    if request.session.test_cookie_worked():
-        print("TEST COOKIE WORKED!")
-        request.session.delete_test_cookie()
+
+
     # Call function to handle the cookies
     visitor_cookie_handler(request)
     context_dict = {}
