@@ -10,14 +10,16 @@ import json
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+
 # From: http://stackoverflow.com/questions/1213706/what-user-do-python-scripts-run-as-in-windows
 def handleRemoveReadonly(func, path, exc):
-  excvalue = exc[1]
-  if func in (os.rmdir, os.remove) and excvalue.errno == errno.EACCES:
-      os.chmod(path, stat.S_IRWXU| stat.S_IRWXG| stat.S_IRWXO) # 0777
-      func(path)
-  else:
-      raise
+    excvalue = exc[1]
+    if func in (os.rmdir, os.remove) and excvalue.errno == errno.EACCES:
+        os.chmod(path, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)  # 0777
+        func(path)
+    else:
+        raise
+
 
 def generate_file_list(test_cases):
     '''
@@ -35,6 +37,7 @@ def generate_file_list(test_cases):
 
     return out
 
+
 def runtests(in_tests, in_errors):
     '''
     Function that runs tests given that a test has not passed
@@ -46,7 +49,8 @@ def runtests(in_tests, in_errors):
             if in_tests[ch][key] is False:
                 temp_test = 'rango.tests_' + ch + '.' + key
                 print temp_test
-                process = subprocess.Popen(['python', 'manage.py', 'test', temp_test], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                process = subprocess.Popen(['python', 'manage.py', 'test', temp_test], stdout=subprocess.PIPE,
+                                           stderr=subprocess.PIPE)
                 out, err = process.communicate()
                 p_status = process.wait()
                 # print err
@@ -59,6 +63,7 @@ def runtests(in_tests, in_errors):
                     out_errors[key] = None
 
     return out_tests, out_errors
+
 
 def main(url_git, student_no, date_deadline):
     '''
@@ -77,7 +82,7 @@ def main(url_git, student_no, date_deadline):
     GIT_ADD = 'git add .'
     GIT_STASH = 'git stash'
     GIT_STASH_DROP = 'git stash drop'
-    GIT_LOG = ['git', 'log', '--pretty=%H', '--before='+date_deadline]
+    GIT_LOG = ['git', 'log', '--pretty=%H', '--before=' + date_deadline]
     TEMP_DIR = 'temporal'
 
     test_cases = cf.dict_chs
@@ -94,7 +99,7 @@ def main(url_git, student_no, date_deadline):
 
     ## Clone Repository
     with open(os.path.join(dir_student, 'report_errors.txt'), 'w') as fp:
-        fp.write("I found errors while cloning your github repository: "+url_git)
+        fp.write("I found errors while cloning your github repository: " + url_git)
         fp.write('===========================================================================\n\n\n')
 
     ret = subprocess.call(GIT_CLONE + url_git + " " + TEMP_DIR, shell=True)
@@ -102,7 +107,7 @@ def main(url_git, student_no, date_deadline):
 
     # Retrieve log history
     with open(os.path.join(dir_student, 'report_errors.txt'), 'w') as fp:
-        fp.write("I couldn't get your log history in your github repository: "+url_git)
+        fp.write("I couldn't get your log history in your github repository: " + url_git)
         fp.write('===========================================================================\n\n\n')
 
     os.chdir(os.path.join(BASE_DIR, TEMP_DIR))
@@ -120,7 +125,7 @@ def main(url_git, student_no, date_deadline):
         fp.write('\n')
 
     with open(os.path.join(dir_student, 'report_errors.txt'), 'w') as fp:
-        fp.write("It seems your github repository is not about Rango: "+url_git)
+        fp.write("It seems your github repository is not about Rango: " + url_git)
         fp.write('===========================================================================\n\n\n')
 
     working_dir = ''
@@ -134,7 +139,7 @@ def main(url_git, student_no, date_deadline):
     assert os.path.isdir(os.path.abspath(working_dir + '/rango'))
 
     with open(os.path.join(dir_student, 'report_errors.txt'), 'w') as fp:
-        fp.write("I found errors while running the automated tests in github repository: "+url_git)
+        fp.write("I found errors while running the automated tests in github repository: " + url_git)
         fp.write('===========================================================================\n\n\n')
 
     # Iterate over commits and run tests
@@ -142,6 +147,15 @@ def main(url_git, student_no, date_deadline):
         os.chdir(os.path.join(BASE_DIR, TEMP_DIR))
         ret = subprocess.call(GIT_CHKOUT + " " + c, shell=True)
         assert ret == 0
+
+        working_dir = ''
+        for root, dirs, files in os.walk("."):
+            for name in files:
+                if 'manage.py' == name:
+                    working_dir = os.path.abspath(root)
+                    break
+
+        print working_dir
 
         # RUN TESTS HERE!!!!
         if os.path.isdir(os.path.abspath(working_dir + '/rango')):
@@ -160,8 +174,7 @@ def main(url_git, student_no, date_deadline):
             except:
                 print "Error while migrating rango!"
             for each in test_files:
-                shutil.copyfile(os.path.join(BASE_DIR, each), os.path.join(working_dir , 'rango', each))
-
+                shutil.copyfile(os.path.join(BASE_DIR, each), os.path.join(working_dir, 'rango', each))
 
             test_cases, error_in_tests = runtests(test_cases, error_in_tests)
         # ==================
@@ -193,6 +206,7 @@ def main(url_git, student_no, date_deadline):
 
     shutil.rmtree(os.path.join(BASE_DIR, TEMP_DIR), ignore_errors=False, onerror=handleRemoveReadonly)
 
+
 if __name__ == "__main__":
     import argparse
 
@@ -208,4 +222,5 @@ if __name__ == "__main__":
         except Exception as e:
             print e.message
     else:
-        raise BaseException("url, student number and deadline are required!!. Type 'python main_script.py -h' for further help")
+        raise BaseException(
+            "url, student number and deadline are required!!. Type 'python main_script.py -h' for further help")

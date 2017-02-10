@@ -20,7 +20,7 @@ def index(request):
     visitor_cookie_handler(request)
     context_dict['visits'] = request.session['visits']
 
-    response = render(request, 'rango/index.html', context_dict)
+    response = render(request, 'rango/index.html', context=context_dict)
 
     # Return response back to the user, updating any cookies that need changed.
     return response
@@ -38,7 +38,7 @@ def about(request):
     context_dict = {}
     context_dict['visits'] = request.session['visits']
 
-    response = render(request, 'rango/about.html', context_dict)
+    response = render(request, 'rango/about.html', context = context_dict)
 
     # Return response back to the user, updating any cookies that need changed.
     return response
